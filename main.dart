@@ -46,10 +46,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
     if (isGameActive && seconds < widget.gameDuration) {
       setState(() {
         _changeButtonPosition();
-        if(isGameActive){
+        if (isGameActive) {
           score += 10;
         }
-
 
         if (seconds >= widget.gameDuration) {
           _endGame();
@@ -63,27 +62,22 @@ class _ScoreScreenState extends State<ScoreScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    topPosition = (random.nextDouble() * screenHeight)+screenHeight*0.1;
+    topPosition = (random.nextDouble() * screenHeight) + screenHeight * 0.1;
     leftPosition = random.nextDouble() * (screenWidth - 56);
-    //if (topPosition  < screenHeight*0.25) {
-    // topPosition = random.nextDouble() * screenHeight;
-    //topPosition = screenHeight + 56;
-    //}
-    while (topPosition + 56 > screenHeight*0.6 ||topPosition < screenHeight*0.1) {
-      topPosition=(random.nextDouble() * screenHeight);
-      //topPosition = screenHeight - 56;
+
+    while (topPosition + 56 > screenHeight * 0.6 || topPosition < screenHeight * 0.1) {
+      topPosition = (random.nextDouble() * screenHeight);
     }
-    if (leftPosition + 56 > screenWidth-56) {
-      leftPosition = screenWidth - 56*2;
+    if (leftPosition + 56 > screenWidth - 56) {
+      leftPosition = screenWidth - 56 * 2;
     }
-    //topPosition=screenHeight*0.1;
   }
 
   void _resetScore() {
     setState(() {
       if (isGameActive) {
         _endGame();
-        isGameActive=false;
+        isGameActive = false;
       }
       score = 0;
       seconds = 0;
@@ -91,11 +85,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
       if (_timer.isActive) {
         _timer.cancel();
       }
-      startButtonVisible = true; // 重置時啟用加分按鈕
+      startButtonVisible = true;
     });
   }
-
-
 
   void _startGame() {
     setState(() {
@@ -129,7 +121,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
         highScore = score;
       }
     }
-    isGameActive=false;
+    isGameActive = false;
     startButtonVisible = true;
   }
 
@@ -226,7 +218,53 @@ class _ScoreScreenState extends State<ScoreScreen> {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late TextEditingController _customDurationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _customDurationController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _customDurationController.dispose();
+    super.dispose();
+  }
+
+  void _startCustomGame() {
+    if (_customDurationController.text.isNotEmpty &&
+        int.tryParse(_customDurationController.text) != null) {
+      int customDuration = int.parse(_customDurationController.text);
+      if (customDuration > 0) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScoreScreen(gameDuration: customDuration),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('請輸入有效的正整數。'),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('汝阿茲海默否?(請填入正整數)'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,30 +276,42 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ScoreScreen(gameDuration: 60)),
+                  MaterialPageRoute(
+                    builder: (context) => ScoreScreen(gameDuration: 60),  // 更改為 60 秒
+                  ),
                 );
               },
               child: Text('60秒模式'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.all(20),
               ),
+
             ),
-            SizedBox(height: 200),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ScoreScreen(gameDuration: 10)),
-                );
-              },
-              child: Text('10秒模式'),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(20),
-              ),
+            SizedBox(height: 250),  // 新增的 SizedBox(250)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 150,
+                  child: TextField(
+                    controller: _customDurationController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: '自定義秒數'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _startCustomGame,
+                  child: Text('開始'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(15),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
