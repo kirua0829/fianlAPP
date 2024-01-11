@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('汝阿茲海默否?(請填入正整數)'),
+          content: Text('請填入正整數'),
         ),
       );
     }
